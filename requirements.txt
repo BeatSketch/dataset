@@ -1,0 +1,3 @@
+py-bsor
+numpy-quaternion
+requests
