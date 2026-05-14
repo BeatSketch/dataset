@@ -1,3 +1,4 @@
 py-bsor
 numpy-quaternion
 requests
+colorama
