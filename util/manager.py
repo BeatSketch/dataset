@@ -1,7 +1,11 @@
 import time
 import multiprocessing as mp
 
-from loading.generator import filter_training_data, generate_training_data, get_no_block_share
+from loading.generator import (
+    filter_training_data,
+    generate_training_data,
+    get_no_block_share,
+)
 from loading.loader import load_replay_data
 from util.tree import divide_work, filesystem_walker
 
@@ -33,7 +37,7 @@ def process_file(file: str):
     )
 
 
-def process_batch(dir: str):
+def process_folder(dir: str):
     """Process a whole folder recursively at once,
         fully parallelized
 
@@ -52,6 +56,7 @@ def process_batch(dir: str):
         handle.join()
 
 
-def process_by_list(files: list[str]):
-    for file in files:
+def process_by_list(files: list[str], printing_prefix: str = ""):
+    for idx, file in enumerate(files):
         process_file(file)
+        print(printing_prefix, "Processed", idx, "/", len(files), "files")
