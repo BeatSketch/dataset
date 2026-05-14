@@ -126,7 +126,7 @@ def determine_possible_locs(
 
 
 def get_no_block_share(training_data: list[BeatSketchTrainingData]):
-    return len(split_blocks_and_no_blocks(training_data)) / len(training_data)
+    return len(split_blocks_and_no_blocks(training_data)[0]) / len(training_data)
 
 
 def split_blocks_and_no_blocks(training_data: list[BeatSketchTrainingData]):
@@ -145,15 +145,17 @@ def split_blocks_and_no_blocks(training_data: list[BeatSketchTrainingData]):
 def filter_training_data(
     no_block_share: float, training_data: list[BeatSketchTrainingData]
 ) -> list[BeatSketchTrainingData]:
-    split = split_blocks_and_no_blocks(training_data)
-    no_block_idxs = np.array(split[0])
-    block_idxs = np.array(split[1])
-    cnt = int(len(no_block_idxs) * no_block_share)
-    # TODO: Should probably be unique random picks
-    rand_picks = np.astype(np.round(np.random.rand(cnt) * cnt), np.int32)
-    idxs = no_block_idxs[rand_picks]
-    np_training_data = np.array(training_data)
+    # Split up blocks
+    no_block_idxs, block_idxs = split_blocks_and_no_blocks(training_data)
 
-    return cast(list[BeatSketchTrainingData], np_training_data[idxs].tolist()) + cast(
+    # Compute the number of blocks to pick
+    cnt = int((len(block_idxs) / (1 - no_block_share)) * no_block_share)
+
+    # Randomly pick using numpy
+    np_training_data = np.array(training_data)
+    rng = np.random.default_rng()
+    picks = rng.choice(no_block_idxs, cnt).tolist()
+
+    return cast(list[BeatSketchTrainingData], np_training_data[picks].tolist()) + cast(
         list[BeatSketchTrainingData], np_training_data[block_idxs].tolist()
     )
