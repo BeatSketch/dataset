@@ -7,7 +7,8 @@ from loading.generator import (
     get_no_block_share,
 )
 from loading.loader import load_replay_data
-from util.tree import divide_work, filesystem_walker
+from util.files import filesystem_walker
+from util import divide_work
 
 
 def process_file(file: str):

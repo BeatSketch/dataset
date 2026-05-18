@@ -39,3 +39,23 @@ def get_bpm_for_song(song_hash: str):
 def write_cache():
     with open("bpmcache.json", "w") as f:
         f.write(json.dumps(bpm_cache))
+
+
+def divide_work(dir_list: list[str], workers: int) -> list[list[str]]:
+    """Divide the work evenly onto `workers` threads
+
+    Args:
+        dir_list: List of files
+        workers: number of threads
+
+    Returns:
+        The split up work
+    """
+    work_per_thread = len(dir_list) // workers
+    work: list[list[str]] = []
+
+    for worker in range(workers):
+        work.append(dir_list[worker * work_per_thread : (worker + 1) * work_per_thread])
+    work[workers] += dir_list[workers * work_per_thread : -1]
+
+    return work
