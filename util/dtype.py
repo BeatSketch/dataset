@@ -1,4 +1,5 @@
 from typing import TypedDict
+import numpy as np
 
 
 class BeatSketchTrainingData(TypedDict):
@@ -11,8 +12,10 @@ class BeatSketchTrainingData(TypedDict):
 
 
 class BeatSketchTrackingData(TypedDict):
-    left: list[float]
-    right: list[float]
+    left: np.ndarray
+    left_dir: np.ndarray
+    right: np.ndarray
+    right_dir: np.ndarray
     time: float
 
 
@@ -21,5 +24,6 @@ class BeatSketchBlock(TypedDict):
     x: int
     y: int
     time: float
+    exact_time: float
     is_right_hand: bool
     good_cut: bool

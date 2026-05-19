@@ -1,15 +1,15 @@
-from typing import cast
+from typing import Literal, cast
 from util.dtype import BeatSketchBlock, BeatSketchTrackingData, BeatSketchTrainingData
 import math
 import numpy as np
 
 # TODO: Find out what the grid size actually is
-GRID_FIELD_WIDTH = 0.5
-GRID_FIELD_HEIGHT = 0.5
+GRID_FIELD_WIDTH = 0.666
+GRID_FIELD_HEIGHT = 0.666
 GRID_Y_MIN_VAL = 0
-GRID_X_MIN_VAL = -1
+GRID_X_MIN_VAL = -1.333
 
-# Into how mnay parts to split each beat (should be power of 2 and no more than 8)
+# Into how many parts to split each beat (should be power of 2 and no more than 8)
 # I do also think we should make this configurable for the user? (or provide 2 settings?)
 # Or at least for the training data, make it depend on the BPM
 BEAT_SPLIT = 4
@@ -38,6 +38,7 @@ def generate_training_data(
     buckets_tracking.append(len(tracking) - 1)
 
     # Determine buckets for blocks
+    # FIXME: Improve this
     buckets_blocks: list[int] = [0]
     bucket_end = sec_per_unit
     for idx, frame in enumerate(blocks):
@@ -60,12 +61,13 @@ def generate_training_data(
         for i in range(TRACKING_PER_UNIT):
             els.append(tracking[prev + math.floor(one_every_n_els * i)])
 
-        locs = determine_possible_locs(els)
+        locs = determine_possible_locs(els) + determine_possible_locs(els, "right")
         # TODO: Append the prev and after slack here
         for loc in locs:
             # Determine if in this beat, there is a block in loc
             is_hit_l = False
             is_hit_r = False
+            # FIXME: This very bad still (i.e. nowhere near all successful slices are in the dataset)
             for block_idx in range(buckets_blocks[beat], buckets_blocks[beat + 1]):
                 if (
                     blocks[block_idx]["x"] == loc[0]
@@ -107,11 +109,23 @@ def generate_training_data(
 
 def determine_possible_locs(
     tracking: list[BeatSketchTrackingData],
+    hand_side: Literal["left"] | Literal["right"] = "left",
 ) -> list[tuple[int, int]]:
+    """Determine possible locations where a block could be placed
+
+    Args:
+        tracking: The tracking data to process
+        hand_side: For which side to do the processing
+
+    Returns:
+        A list of coordinates on the grid that were touched by the tip
+    """
+    # TODO: Use also the direction vector of controller to increase hit area
     # Compute which grid spots the controller tip touches
     coords: list[tuple[int, int]] = []
     for pos in tracking:
-        hand = pos["left"]
+        hand = pos[hand_side]
+        dir = pos["left_dir" if hand_side == "left" else "right_dir"]
         for line in range(3):
             for col in range(4):
                 if (
@@ -120,7 +134,10 @@ def determine_possible_locs(
                     and hand[1] < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
                     and hand[1] > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
                 ):
-                    coords.append((line, col))
+                    try:
+                        coords.index((line, col))
+                    except Exception:
+                        coords.append((line, col))
 
     return coords
 

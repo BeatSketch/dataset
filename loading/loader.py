@@ -1,8 +1,7 @@
-from typing import cast
 from bsor.Bsor import make_bsor
 import quaternion
 import numpy as np
-from util.dtype import BeatSketchBlock, BeatSketchTrackingData, BeatSketchTrainingData
+from util.dtype import BeatSketchBlock, BeatSketchTrackingData
 from util import get_bpm_for_song
 
 # TODO: Figure out what the base vector is (unit vector in which direction?)
@@ -51,8 +50,10 @@ def load_replay_data(file: str):
             tip_r = dir_r + np.array(hand_l.position)
             tracking_data.append(
                 {
-                    "left": cast(list[float], tip_l.tolist()),
-                    "right": cast(list[float], tip_r.tolist()),
+                    "left": tip_l,
+                    "left_dir": -dir_l,
+                    "right": tip_r,
+                    "right_dir": -dir_r,
                     "time": frame.time,
                 }
             )
@@ -69,6 +70,7 @@ def load_replay_data(file: str):
                         "is_right_hand": block.colorType == 1,
                         "orientation": orientation,
                         "time": block.event_time - block.cut.timeDeviation,
+                        "exact_time": block.event_time,
                         "x": block.lineIndex,
                         "y": block.noteLineLayer,
                         "good_cut": True,
@@ -80,6 +82,7 @@ def load_replay_data(file: str):
                         "good_cut": False,
                         "orientation": 0,
                         "time": block.event_time,
+                        "exact_time": block.event_time,
                         "is_right_hand": False,
                         "x": 0,
                         "y": 0,
