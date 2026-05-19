@@ -2,7 +2,7 @@ from bsor.Bsor import make_bsor
 import quaternion
 import numpy as np
 from util.dtype import BeatSketchBlock, BeatSketchTrackingData
-from util import get_bpm_for_song
+from util.bpm_cache import get_bpm_for_song
 
 # TODO: Figure out what the base vector is (unit vector in which direction?)
 # This is almost certainly correct
@@ -27,7 +27,7 @@ def load_replay_data(file: str):
         # I am almost certain this is correct
         bsor = make_bsor(f)
 
-        bpm = get_bpm_for_song(bsor.info.songHash)
+        bpm = get_bpm_for_song(bsor.info.songHash)[0]
 
         # Discard map criteria
         if bsor.info.speed != 0:

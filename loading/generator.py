@@ -35,6 +35,7 @@ def generate_training_data(
     blocks: list[BeatSketchBlock],
     bpm: int,
     njs: float,
+    print_missing_datapoints_stats: bool = True
 ) -> BeatSketchTrainingDataSet:
     training_data: list[BeatSketchTrainingData] = []
     sec_per_unit = 60 / (bpm * BEAT_SPLIT)
@@ -53,6 +54,7 @@ def generate_training_data(
     # Generate the tracking data
     hit_blocks = process_blocks(blocks, bpm)
     block_idx: list[int] = [0, 0]
+    too_few_elements_incidents: list[int] = []
     for unit in range(len(buckets)):
         bucket = buckets[unit]
         for i, indices in enumerate(bucket):
@@ -62,9 +64,9 @@ def generate_training_data(
             els: list[np.ndarray] = []
 
             if len(indices) < TRACKING_PER_UNIT:
-                print(f"WARNING: Skipped data points filled in with {TRACKING_PER_UNIT - len(indices)} 0s")
+                too_few_elements_incidents.append(TRACKING_PER_UNIT - len(indices))
                 for _ in range(TRACKING_PER_UNIT - len(indices)):
-                    els.append(np.array([0, 0, 0]))
+                    els.append(np.array([0, 0, 0, 0, 0, 0]))
 
             for k in range(min(TRACKING_PER_UNIT, len(indices))):
                 els.append(tracking[indices[math.floor(one_every_n_els * k)]][hand])
@@ -97,6 +99,9 @@ def generate_training_data(
                         "beat": unit / BEAT_SPLIT,
                     }
                 )
+
+    if print_missing_datapoints_stats and len(too_few_elements_incidents) > 0:
+        print("There were", len(too_few_elements_incidents), "instances where there were too few blocks per bucket")
 
     return {"data": training_data, "njs": njs, "bpm": bpm}
 

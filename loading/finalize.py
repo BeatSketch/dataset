@@ -8,15 +8,8 @@ def generate_real_dataset(
     labels: list[bool] = []
     for val in data["data"]:
         labels.append(val["has_block"])
-        left: list[float] = [val["x"], val["y"], val["beat"]]
-        right: list[float] = [val["x"], val["y"], val["beat"]]
-        for tracked in val["tracking"]:
-            left += tracked["left"]
-            left.append(tracked["time"])
-            right += tracked["right"]
-            right.append(tracked["time"])
+        block: list[float] = [val["x"], val["y"], val["beat"]]
 
-        vals.append(left)
-        vals.append(right)
+        vals.append(block)
 
     return vals, labels
