@@ -60,7 +60,13 @@ def generate_training_data(
             hand = "left" if i == 0 else "right"
             one_every_n_els = len(indices) / TRACKING_PER_UNIT
             els: list[np.ndarray] = []
-            for k in range(TRACKING_PER_UNIT):
+
+            if len(indices) < TRACKING_PER_UNIT:
+                print(f"WARNING: Skipped data points filled in with {TRACKING_PER_UNIT - len(indices)} 0s")
+                for _ in range(TRACKING_PER_UNIT - len(indices)):
+                    els.append(np.array([0, 0, 0]))
+
+            for k in range(min(TRACKING_PER_UNIT, len(indices))):
                 els.append(tracking[indices[math.floor(one_every_n_els * k)]][hand])
 
             # Combine with pre-processed blocks
