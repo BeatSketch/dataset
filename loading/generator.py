@@ -13,6 +13,8 @@ GRID_FIELD_WIDTH = 0.666
 GRID_FIELD_HEIGHT = 0.666
 GRID_Y_MIN_VAL = 0
 GRID_X_MIN_VAL = -1.333
+# In percent of the saber length, how much of it is considered the tip
+THRESHOLD = 0.3
 
 # Into how many parts to split each beat (should be power of 2 and no more than 8)
 # I do also think we should make this configurable for the user? (or provide 2 settings?)
@@ -121,9 +123,9 @@ def hit_locations(
                             and hand[1] > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
                         )
                         or (
-                            hand[1] - dir[1]
+                            hand[1] - THRESHOLD * dir[1]
                             < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
-                            and hand[1] - dir[1]
+                            and hand[1] - THRESHOLD * dir[1]
                             > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
                         )
                     )
