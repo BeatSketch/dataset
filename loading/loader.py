@@ -50,10 +50,8 @@ def load_replay_data(file: str):
             tip_r = dir_r + np.array(hand_l.position)
             tracking_data.append(
                 {
-                    "left": tip_l,
-                    "left_dir": -dir_l,
-                    "right": tip_r,
-                    "right_dir": -dir_r,
+                    "left": np.concatenate((tip_l, dir_l)),
+                    "right": np.concatenate((tip_r, dir_r)),
                     "time": frame.time,
                 }
             )
@@ -88,7 +86,7 @@ def load_replay_data(file: str):
                         "y": 0,
                     }
                 )
-    return tracking_data, block_data, bpm
+    return tracking_data, block_data, bpm, bsor.info.jumpDistance
 
 
 def orientation_from_angle(angle: float) -> int:

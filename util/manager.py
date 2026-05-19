@@ -1,11 +1,11 @@
 import time
 import multiprocessing as mp
 
-from loading.generator import (
+from loading.filter import (
     filter_training_data,
-    generate_training_data,
     get_no_block_share,
 )
+from loading.gen_new import generate_training_data
 from loading.loader import load_replay_data
 from util.files import filesystem_walker
 from util import divide_work
@@ -15,15 +15,15 @@ def process_file(file: str):
     start = time.time()
     data = load_replay_data(file)
     mid = time.time()
-    training_data = generate_training_data(data[0], data[1], data[2])
+    training_data = generate_training_data(data[0], data[1], data[2], data[3])
     print(
-        len(training_data),
+        len(training_data["data"]),
         "datapoints were generated from this file, with no block share of",
         str(get_no_block_share(training_data) * 100) + "%",
     )
     filtered_data = filter_training_data(0.5, training_data)
     print(
-        len(filtered_data),
+        len(filtered_data["data"]),
         "datapoints filtered, no block share of",
         str(get_no_block_share(filtered_data) * 100) + "%",
     )

@@ -2,8 +2,14 @@ from typing import TypedDict
 import numpy as np
 
 
+class BeatSketchTrainingDataSet(TypedDict):
+    data: list[BeatSketchTrainingData]
+    njs: float
+    bpm: int
+
+
 class BeatSketchTrainingData(TypedDict):
-    tracking: list[BeatSketchTrackingData]
+    tracking: list[np.ndarray]
     beat: float
     has_block: bool
     is_right_hand: bool
@@ -13,9 +19,7 @@ class BeatSketchTrainingData(TypedDict):
 
 class BeatSketchTrackingData(TypedDict):
     left: np.ndarray
-    left_dir: np.ndarray
     right: np.ndarray
-    right_dir: np.ndarray
     time: float
 
 
