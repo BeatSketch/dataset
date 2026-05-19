@@ -1,4 +1,4 @@
-from typing import Literal, cast
+from typing import Literal
 from util.dtype import (
     BeatSketchBlock,
     BeatSketchTrackingData,
@@ -19,12 +19,13 @@ GRID_X_MIN_VAL = -1.333
 # Or at least for the training data, make it depend on the BPM
 BEAT_SPLIT = 4
 # Number of tracking data points per time unit
-TRACKING_PER_UNIT = 5
+TRACKING_PER_UNIT = 4
 
 # How many of the datapoints before to include
 DATA_SLACK_BEFORE = 4
 # How many of the datapoints after to include
 DATA_SLACK_AFTER = 4
+HANDS: list[Literal["left"] | Literal["right"]] = ["left", "right"]
 
 
 def generate_training_data(
@@ -36,153 +37,124 @@ def generate_training_data(
     training_data: list[BeatSketchTrainingData] = []
     sec_per_unit = 60 / (bpm * BEAT_SPLIT)
 
-    # Determine buckets for tracking data
-    buckets_tracking: list[int] = []
-    bucket_end = sec_per_unit
+    # Determine which time unit each data point belongs to
+    buckets: dict[int, tuple[list[int], list[int]]] = {}
     for idx, frame in enumerate(tracking):
-        if frame["time"] > bucket_end:
-            buckets_tracking.append(idx)
-            bucket_end += sec_per_unit
-    buckets_tracking.append(len(tracking) - 1)
+        for i, hand in enumerate(HANDS):
+            time = int((frame["time"] + frame[hand][2] / njs) / sec_per_unit)
+            try:
+                buckets[time][i].append(idx)
+            except Exception:
+                buckets[time] = ([], [])
+                buckets[time][i].append(idx)
 
-    # Determine buckets for blocks
-    # FIXME: Improve this
-    buckets_blocks: list[int] = [0]
-    bucket_end = sec_per_unit
-    for idx, frame in enumerate(blocks):
-        if frame["time"] > bucket_end:
-            diff = frame["time"] - bucket_end
-            while diff > sec_per_unit:
-                # Need to add empty buckets
-                diff -= sec_per_unit
-                buckets_blocks.append(idx)
-            buckets_blocks.append(idx)
-            bucket_end += sec_per_unit
-    buckets_blocks.append(len(blocks) - 1)
+    # Generate the tracking data
+    hit_blocks = process_blocks(blocks, bpm)
+    block_idx: list[int] = [0, 0]
+    for unit in range(len(buckets)):
+        bucket = buckets[unit]
+        for i, indices in enumerate(bucket):
+            # Limit the number of data points used
+            hand = "left" if i == 0 else "right"
+            one_every_n_els = len(indices) / TRACKING_PER_UNIT
+            els: list[np.ndarray] = []
+            for k in range(TRACKING_PER_UNIT):
+                els.append(tracking[indices[math.floor(one_every_n_els * k)]][hand])
 
-    # Compute the training data
-    prev = 0
-    for beat, end in enumerate(buckets_tracking):
-        one_every_n_els = (end - prev) / TRACKING_PER_UNIT
+            # Combine with pre-processed blocks
+            already_processed_locations: list[tuple[int, int]] = []
+            for j in range(block_idx[i], len(hit_blocks)):
+                u = int(hit_blocks[j]["beat"] * BEAT_SPLIT)
+                if u == unit:
+                    if not (hit_blocks[j]["is_right_hand"] ^ (hand == "right")):
+                        hit_blocks[j]["tracking"] += els
+                        already_processed_locations.append(
+                            (hit_blocks[j]["x"], hit_blocks[j]["y"])
+                        )
+                        training_data.append(hit_blocks[j])
+                elif u > unit:
+                    block_idx[i] = j
+                    break
 
-        els: list[BeatSketchTrackingData] = []
-        for i in range(TRACKING_PER_UNIT):
-            els.append(tracking[prev + math.floor(one_every_n_els * i)])
+            # Compute the hits and generate training data array from it
+            hits = hit_locations(els, already_processed_locations)
+            for hit in hits:
+                training_data.append(
+                    {
+                        "tracking": els[:3],  # Only want the tips and not the direction
+                        "x": hit[0],
+                        "y": hit[1],
+                        "is_right_hand": hand == "right",
+                        "has_block": False,
+                        "beat": unit / BEAT_SPLIT,
+                    }
+                )
 
-        locs = determine_possible_locs(els) + determine_possible_locs(els, "right")
-        # TODO: Append the prev and after slack here
-        for loc in locs:
-            # Determine if in this beat, there is a block in loc
-            is_hit_l = False
-            is_hit_r = False
-            # FIXME: This very bad still (i.e. nowhere near all successful slices are in the dataset)
-            for block_idx in range(buckets_blocks[beat], buckets_blocks[beat + 1]):
-                if (
-                    blocks[block_idx]["x"] == loc[0]
-                    and blocks[block_idx]["y"] == loc[1]
-                ):
-                    if blocks[block_idx]["is_right_hand"]:
-                        is_hit_r = True
-                    else:
-                        is_hit_l = True
-
-                    if is_hit_r and is_hit_l:
-                        break
-
-            training_data.append(
-                {
-                    "is_right_hand": False,
-                    "x": loc[0],
-                    "y": loc[1],
-                    "beat": beat,
-                    "has_block": is_hit_l,
-                    "tracking": els,
-                }
-            )
-            training_data.append(
-                {
-                    "is_right_hand": True,
-                    "x": loc[0],
-                    "y": loc[1],
-                    "beat": beat,
-                    "has_block": is_hit_r,
-                    "tracking": els,
-                }
-            )
-
-        prev = end
-
-    return {"data": training_data, "bpm": bpm, "njs": njs}
+    return {"data": training_data, "njs": njs, "bpm": bpm}
 
 
-def determine_possible_locs(
-    tracking: list[BeatSketchTrackingData],
-    hand_side: Literal["left"] | Literal["right"] = "left",
+def hit_locations(
+    tracking: list[np.ndarray],
+    already_hit: list[tuple[int, int]],
 ) -> list[tuple[int, int]]:
+    locations: list[tuple[int, int]] = []
     """Determine possible locations where a block could be placed
 
     Args:
         tracking: The tracking data to process
-        hand_side: For which side to do the processing
+        already_hit: A list of all already processed locations
 
     Returns:
         A list of coordinates on the grid that were touched by the tip
     """
-    # TODO: Use also the direction vector of controller to increase hit area
-    # Compute which grid spots the controller tip touches
-    coords: list[tuple[int, int]] = []
     for pos in tracking:
-        hand = pos[hand_side]
-        dir = pos["left_dir" if hand_side == "left" else "right_dir"]
+        hand = pos[:3]
+        dir = pos[3:]
         for line in range(3):
             for col in range(4):
                 if (
                     hand[0] < GRID_X_MIN_VAL + (col + 1) * GRID_FIELD_WIDTH
                     and hand[0] > GRID_X_MIN_VAL + col * GRID_FIELD_WIDTH
-                    and hand[1] < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
-                    and hand[1] > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
+                    and (
+                        (
+                            hand[1] < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
+                            and hand[1] > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
+                        )
+                        or (
+                            hand[1] - dir[1]
+                            < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
+                            and hand[1] - dir[1]
+                            > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
+                        )
+                    )
                 ):
                     try:
-                        coords.index((line, col))
+                        locations.index((line, col))
                     except Exception:
-                        coords.append((line, col))
+                        try:
+                            already_hit.index((line, col))
+                        except Exception:
+                            locations.append((line, col))
 
-    return coords
-
-
-def get_no_block_share(training_data: BeatSketchTrainingDataSet):
-    return len(split_blocks_and_no_blocks(training_data)[0]) / len(training_data)
-
-
-def split_blocks_and_no_blocks(training_data: BeatSketchTrainingDataSet):
-    no_block_idxs: list[int] = []
-    block_idxs: list[int] = []
-
-    for idx, d in enumerate(training_data["data"]):
-        if not d["has_block"]:
-            no_block_idxs.append(idx)
-        else:
-            block_idxs.append(idx)
-
-    return no_block_idxs, block_idxs
+    return locations
 
 
-def filter_training_data(
-    no_block_share: float, training_data: BeatSketchTrainingDataSet
-) -> BeatSketchTrainingDataSet:
-    # Split up blocks
-    no_block_idxs, block_idxs = split_blocks_and_no_blocks(training_data)
+def process_blocks(
+    blocks: list[BeatSketchBlock], bpm: int
+) -> list[BeatSketchTrainingData]:
+    data: list[BeatSketchTrainingData] = []
 
-    # Compute the number of blocks to pick
-    cnt = int((len(block_idxs) / (1 - no_block_share)) * no_block_share)
+    for block in blocks:
+        if block["good_cut"]:
+            data.append(
+                {
+                    "has_block": True,
+                    "beat": block["time"] / bpm,
+                    "is_right_hand": block["is_right_hand"],
+                    "x": block["x"],
+                    "y": block["y"],
+                    "tracking": [],
+                }
+            )
 
-    # Randomly pick using numpy
-    np_training_data = np.array(training_data)
-    rng = np.random.default_rng()
-    picks = rng.choice(no_block_idxs, cnt).tolist()
-
-    training_data["data"] = cast(
-        list[BeatSketchTrainingData], np_training_data[picks].tolist()
-    ) + cast(list[BeatSketchTrainingData], np_training_data[block_idxs].tolist())
-
-    return training_data
+    return data

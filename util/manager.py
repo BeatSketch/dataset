@@ -5,7 +5,7 @@ from loading.filter import (
     filter_training_data,
     get_no_block_share,
 )
-from loading.gen_new import generate_training_data
+from loading.generator import generate_training_data
 from loading.loader import load_replay_data
 from util.files import filesystem_walker
 from util import divide_work
