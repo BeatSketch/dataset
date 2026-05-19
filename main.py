@@ -2,7 +2,6 @@ import multiprocessing
 import sys
 import colorama
 from util.manager import folder_preprocessing, process_file, process_folder
-from util.bpm_cache import load_cache, write_cache
 
 
 def print_help():
@@ -19,19 +18,13 @@ possible commands:
 if __name__ == "__main__":
     multiprocessing.freeze_support()
     if sys.argv[1] == "file":
-        load_cache()
         process_file(sys.argv[2])
-        write_cache()
     elif sys.argv[1] == "folder":
-        load_cache()
         process_folder(sys.argv[2])
-        write_cache()
     elif sys.argv[1] == "help" or sys.argv[1] == "-h" or sys.argv[1] == "--help":
         print_help()
     elif sys.argv[1] == "bpm":
-        load_cache()
         folder_preprocessing(sys.argv[2])
-        write_cache()
     else:
         print(
             colorama.Fore.RED + colorama.Style.DIM + "Invalid argument",

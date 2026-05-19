@@ -8,11 +8,11 @@ def divide_work(dir_list: list[str], workers: int) -> list[list[str]]:
     Returns:
         The split up work
     """
-    work_per_thread = len(dir_list) // workers
+    work_per_thread = len(dir_list) // (workers - 1)
     work: list[list[str]] = []
 
     for worker in range(workers):
         work.append(dir_list[worker * work_per_thread : (worker + 1) * work_per_thread])
-    work[workers - 1] += dir_list[workers * work_per_thread : -1]
+    work.append(dir_list[(workers - 1) * work_per_thread : -1])
 
     return work

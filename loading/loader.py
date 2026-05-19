@@ -2,7 +2,7 @@ from bsor.Bsor import make_bsor
 import quaternion
 import numpy as np
 from util.dtype import BeatSketchBlock, BeatSketchTrackingData
-from util.bpm_cache import get_bpm_for_song
+from util.bpm_cache import BPMCache
 
 # TODO: Figure out what the base vector is (unit vector in which direction?)
 # This is almost certainly correct
@@ -14,7 +14,7 @@ translation = [0, 4, 2, 6, 1, 7, 3, 5]
 
 # https://github.com/BeatLeader/BS-Open-Replay
 # This is the replay format used
-def load_replay_data(file: str):
+def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
     """Generate training data from the specified replay file
        The bpm for the song is fetched automatically from the BeatSaver API
 
@@ -27,12 +27,18 @@ def load_replay_data(file: str):
         # I am almost certain this is correct
         bsor = make_bsor(f)
 
-        bpm = get_bpm_for_song(bsor.info.songHash)[0]
+        bpm = cache.get_bpm_for_song(bsor.info.songHash)[0]
 
         # Discard map criteria
         if bsor.info.speed != 0:
-            print("This map was played in practice mode -> Not suitable")
-            exit(0)
+            if print_debugging:
+                print("This map was played in practice mode -> Not suitable")
+            return False
+
+        if bsor.info.mode != "Standard":
+            if print_debugging:
+                print("This map uses non-standard mode")
+            return False
         tracking_data: list[BeatSketchTrackingData] = []
 
         for frame in bsor.frames:

@@ -35,7 +35,7 @@ def generate_training_data(
     blocks: list[BeatSketchBlock],
     bpm: int,
     njs: float,
-    print_missing_datapoints_stats: bool = True
+    print_debugging: bool = True
 ) -> BeatSketchTrainingDataSet:
     training_data: list[BeatSketchTrainingData] = []
     sec_per_unit = 60 / (bpm * BEAT_SPLIT)
@@ -56,7 +56,11 @@ def generate_training_data(
     block_idx: list[int] = [0, 0]
     too_few_elements_incidents: list[int] = []
     for unit in range(len(buckets)):
-        bucket = buckets[unit]
+        bucket = ([], [])
+        try:
+            bucket = buckets[unit]
+        except KeyError:
+            pass
         for i, indices in enumerate(bucket):
             # Limit the number of data points used
             hand = "left" if i == 0 else "right"
@@ -100,7 +104,7 @@ def generate_training_data(
                     }
                 )
 
-    if print_missing_datapoints_stats and len(too_few_elements_incidents) > 0:
+    if print_debugging and len(too_few_elements_incidents) > 0:
         print("There were", len(too_few_elements_incidents), "instances where there were too few blocks per bucket")
 
     return {"data": training_data, "njs": njs, "bpm": bpm}
