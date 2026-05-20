@@ -6,7 +6,7 @@ from util.bpm_cache import BPMCache
 
 # TODO: Figure out what the base vector is (unit vector in which direction?)
 # This is almost certainly correct
-base_vec = np.array([1, 0, 0])
+base_vec = np.array([0, 1, 0])
 angle_comp_vec = base_vec
 # TODO: Verify I got this right
 translation = [0, 4, 2, 6, 1, 7, 3, 5]
