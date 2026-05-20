@@ -2,3 +2,6 @@ py-bsor
 numpy-quaternion
 requests
 colorama
+onnxruntime
+scikit-learn
+skl2onnx
