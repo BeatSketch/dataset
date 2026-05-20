@@ -2,7 +2,7 @@
 
 
 import colorama
-import multiprocessing
+import multiprocessing as mp
 import sys
 
 
@@ -25,11 +25,17 @@ if __name__ == "__main__":
     try:
         from util.manager import folder_preprocessing, process_file, process_folder
     except ModuleNotFoundError as e:
-        print(colorama.Style.DIM + colorama.Fore.RED + "Not all required python modules are installed.")
-        print(colorama.Fore.RESET + "To fix, run `python -m pip install -r requirements.txt` in this folder")
+        print(
+            colorama.Style.DIM
+            + colorama.Fore.RED
+            + "Not all required python modules are installed."
+        )
+        print(
+            colorama.Fore.RESET
+            + "To fix, run `python -m pip install -r requirements.txt` in this folder"
+        )
         exit(1)
 
-    multiprocessing.freeze_support()
     idx = 1
     train_model = False
     if len(sys.argv) < 2:
@@ -42,12 +48,21 @@ if __name__ == "__main__":
         if len(sys.argv) <= idx + 1:
             print("Missing argument for file")
             exit(1)
-        process_file(sys.argv[idx + 1])
+        process_file(sys.argv[idx + 1], train_model)
     elif sys.argv[idx] == "folder":
         if len(sys.argv) <= idx + 1:
             print("Missing argument for folder")
             exit(1)
-        process_folder(sys.argv[idx + 1])
+        mp.freeze_support()
+        process_folder(
+            sys.argv[idx + 1],
+            train_model,
+            max_files=(
+                mp.cpu_count()
+                if len(sys.argv) >= idx + 3 and sys.argv[idx + 2] == "test"
+                else -1
+            ),
+        )
     elif sys.argv[idx] == "help" or sys.argv[idx] == "-h" or sys.argv[idx] == "--help":
         print_help()
     elif sys.argv[idx] == "bpm":

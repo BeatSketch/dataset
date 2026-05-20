@@ -2,7 +2,7 @@ import time
 import colorama
 from util.bpm_cache import BPMCache
 from util.dtype import BeatSketchTrainingDataSet
-from util.files import filesystem_walker, write_file
+from util.files import filesystem_walker
 from util import divide_work
 import multiprocessing as mp
 
@@ -16,7 +16,7 @@ def folder_preprocessing(dir: str) -> list[str]:
     all_files = filesystem_walker(dir)
     print("Retrieving BPM for all replays. This may take a while")
     # Only keep the files of which we know the BPM
-    files = BPMCache().get_bpm_for_file_list(all_files)
+    files = BPMCache(True).get_bpm_for_file_list(all_files)
     print(
         colorama.Fore.GREEN + colorama.Style.DIM + "BPM download complete, using",
         len(files),
@@ -29,13 +29,23 @@ def folder_preprocessing(dir: str) -> list[str]:
 
 
 def _process_file_list(files: list[str]) -> list[BeatSketchTrainingDataSet]:
-    processed = []
+    processed: list[BeatSketchTrainingDataSet] = []
     cache = BPMCache()
     for idx, file in enumerate(files):
         try:
             data = process_file(file, cache, print_debugging=print_debugging)
-            if isinstance(data, dict):
-                processed.append(data)
+            if not not data:
+                processed += data
+                if print_status:
+                    print(
+                        f"Processed",
+                        idx + 1,
+                        "/",
+                        len(files),
+                        "files",
+                    )
+            else:
+                print("processing of file", file, "failed for unknown reasons")
         except Exception as e:
             print(
                 "Processing of file",
@@ -43,18 +53,10 @@ def _process_file_list(files: list[str]) -> list[BeatSketchTrainingDataSet]:
                 "failed due to error",
                 repr(e),
             )
-        if print_status:
-            print(
-                f"Processed",
-                idx + 1,
-                "/",
-                len(files),
-                "files",
-            )
     return processed
 
 
-def process_folder(dir: str):
+def process_folder(dir: str, max_files=-1):
     """Process a whole folder recursively at once,
         fully parallelized
 
@@ -63,26 +65,43 @@ def process_folder(dir: str):
     """
     start = time.time()
     files = folder_preprocessing(dir)
+    if max_files > 0:
+        files = files[:max_files]
+        print(
+            colorama.Style.DIM
+            + colorama.Fore.YELLOW
+            + "\nDEBUG MODE ACTIVE, only one file per thread for processing\n"
+            + colorama.Style.RESET_ALL
+        )
+
+    # Split work and process
     split_work = divide_work(files, mp.cpu_count())
+    print("Using", len(split_work), "threads to process data")
     pool = mp.Pool()
     data: list[list[BeatSketchTrainingDataSet]] = pool.map(
         _process_file_list, split_work
     )
 
-    print("Total number of files processed is", len(files))
+    # Flatten dataset
+    flattened: list[BeatSketchTrainingDataSet] = []
+
+    for thread in data:
+        for file in thread:
+            flattened.append(file)
+
+    # Print stats
     dur = time.time() - start
     print(
-        "This operation has taken",
-        dur,
-        f"seconds ({len(files) / dur} files per second)",
+        "\nProcessing of",
+        len(flattened),
+        "files took",
+        round(dur, 3),
+        f"seconds ({round(len(files) / dur, 4)} files per s /",
+        round(dur / len(files) * mp.cpu_count(), 4),
+        "s per file singlethreaded)\n",
+        "with",
+        len(files) - len(flattened),
+        "failing to process\n"
     )
-    print("That is", dur / len(files) * mp.cpu_count(), "seconds per file for a single thread")
-    print(len(data))
-    # TODO: Processing should include transforming to actually usable format
-    # write_file("data.json", json.dumps(data))
-    print(
-        colorama.Style.DIM
-        + colorama.Fore.GREEN
-        + "\n==> File saved to current directory",
-        colorama.Style.RESET_ALL,
-    )
+
+    return flattened

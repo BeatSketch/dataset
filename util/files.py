@@ -1,3 +1,4 @@
+import colorama
 import os
 
 
@@ -19,3 +20,9 @@ def write_file(file: str, content: str):
     with open(file, "w") as f:
         f.write(content)
         f.close()
+        print(
+            colorama.Style.DIM
+            + colorama.Fore.GREEN
+            + "\n==> File saved to current directory",
+            colorama.Style.RESET_ALL,
+        )

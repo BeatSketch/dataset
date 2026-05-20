@@ -8,7 +8,7 @@ from loading.loader import load_replay_data
 from util.bpm_cache import BPMCache
 
 
-def process_file(file: str, cache: BPMCache, print_debugging: bool = False):
+def process_file(file: str, cache: BPMCache,print_debugging: bool = False):
     start = time.time()
     data = load_replay_data(file, cache, print_debugging)
     mid = time.time()
@@ -39,4 +39,4 @@ def process_file(file: str, cache: BPMCache, print_debugging: bool = False):
             "and generating taking",
             time.time() - mid,
         )
-    return filtered_data
+    return [filtered_data]

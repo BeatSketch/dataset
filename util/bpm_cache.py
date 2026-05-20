@@ -7,16 +7,17 @@ import json
 class BPMCache:
     _bpm_cache: dict[str, int]
 
-    def __init__(self):
+    def __init__(self, print_cache_load_success: bool = False):
         try:
             with open("bpmcache.json", "r") as f:
                 self._bpm_cache = json.loads(f.read())
-                print(
-                    colorama.Fore.GREEN
-                    + colorama.Style.DIM
-                    + "Loaded cache file for BPM",
-                    colorama.Style.RESET_ALL,
-                )
+                if print_cache_load_success:
+                    print(
+                        colorama.Fore.GREEN
+                        + colorama.Style.DIM
+                        + "Loaded cache file for BPM",
+                        colorama.Style.RESET_ALL,
+                    )
         except FileNotFoundError:
             print(
                 colorama.Fore.RED + colorama.Style.DIM + "No cache file for BPM found",

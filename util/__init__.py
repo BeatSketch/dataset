@@ -11,8 +11,8 @@ def divide_work(dir_list: list[str], workers: int) -> list[list[str]]:
     work_per_thread = len(dir_list) // (workers - 1)
     work: list[list[str]] = []
 
-    for worker in range(workers):
+    for worker in range(workers - 1):
         work.append(dir_list[worker * work_per_thread : (worker + 1) * work_per_thread])
-    work.append(dir_list[(workers - 1) * work_per_thread : -1])
+    work.append(dir_list[(workers - 1) * work_per_thread :])
 
     return work
