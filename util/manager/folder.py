@@ -9,7 +9,7 @@ import multiprocessing as mp
 from util.manager.file import process_file
 
 print_debugging = False
-print_status = True
+print_status = False
 
 
 def folder_preprocessing(dir: str) -> list[str]:
