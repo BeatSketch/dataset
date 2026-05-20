@@ -1,8 +1,6 @@
-import json
 import ml
 import util.manager.file as file
 from util.bpm_cache import BPMCache
-from util.files import write_file
 from util.manager.folder import folder_preprocessing, process_folder as fp
 
 
@@ -10,18 +8,37 @@ def preprocess_folder(dir: str):
     folder_preprocessing(dir)
 
 
-def process_folder(dir: str, train: bool, save: bool = False, max_files=-1):
+def process_folder(
+    dir: str,
+    train: bool,
+    processed_save_location: str = "",
+    max_files: int = -1,
+):
+    """Process all bsor files in a folder
+
+    Args:
+        max_files: The maximum number of files to process
+        dir: The directory to process
+        train: Whether or not to train the model
+        processed_save_location: If not empty string, path to file to store dataset in
+    """
     data = fp(dir, max_files=max_files)
-    if save:
-        # TODO: Transform into usable format?
-        write_file("data.json", json.dumps(data))
+
     if train:
-        ml.train(data)
+        ml.train(data, dataset_save_location=processed_save_location)
+    else:
+        if processed_save_location == "":
+            print("ERROR: No save location for dataset specified")
+            exit(1)
+        ml.preprocess_only(data, processed_save_location)
 
 
-def process_file(filename: str, train: bool, save: bool = False):
+def process_file(
+    filename: str,
+    train: bool,
+    processed_save_location: str = "",
+):
     data = file.process_file(filename, BPMCache(), True)
-    if save:
-        write_file("file.json", json.dumps(data))
+
     if train and data:
-        ml.train(data)
+        ml.train(data, dataset_save_location=processed_save_location)

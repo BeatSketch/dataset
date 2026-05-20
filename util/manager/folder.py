@@ -14,7 +14,7 @@ print_status = False
 
 def folder_preprocessing(dir: str) -> list[str]:
     all_files = filesystem_walker(dir)
-    print("Retrieving BPM for all replays. This may take a while")
+    print("\n==> Retrieving BPM for all replays. This may take a while\n")
     # Only keep the files of which we know the BPM
     files = BPMCache(True).get_bpm_for_file_list(all_files)
     print(
@@ -22,7 +22,7 @@ def folder_preprocessing(dir: str) -> list[str]:
         len(files),
         "out of",
         len(all_files),
-        "replays",
+        "replays\n",
         colorama.Style.RESET_ALL,
     )
     return files
@@ -76,7 +76,7 @@ def process_folder(dir: str, max_files=-1):
 
     # Split work and process
     split_work = divide_work(files, mp.cpu_count())
-    print("Using", len(split_work), "threads to process data")
+    print("\n--> Using", len(split_work), "threads to process data\n")
     pool = mp.Pool()
     data: list[list[BeatSketchTrainingDataSet]] = pool.map(
         _process_file_list, split_work
