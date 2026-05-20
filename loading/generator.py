@@ -95,7 +95,7 @@ def generate_training_data(
             for hit in hits:
                 training_data.append(
                     {
-                        "tracking": els[:3],  # Only want the tips and not the direction
+                        "tracking": els,
                         "x": hit[0],
                         "y": hit[1],
                         "is_right_hand": hand == "right",
