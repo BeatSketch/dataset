@@ -3,12 +3,13 @@
 
 import colorama
 import multiprocessing as mp
-import ml
 import util.cli as cli
 
 if __name__ == "__main__":
     try:
         from util.manager import folder_preprocessing, process_file, process_folder
+        import ml
+        from util import loader_exporter
     except ModuleNotFoundError as e:
         print(
             colorama.Style.DIM
@@ -21,7 +22,6 @@ if __name__ == "__main__":
         )
         exit(1)
     args, ap = cli.parse_args()
-    print(args)
 
     if args.cmd == "preprocess":
         if args.preprocess == "file":
@@ -46,4 +46,5 @@ if __name__ == "__main__":
                 max_files=mp.cpu_count() if args.test else -1,
             )
         elif args.train == "dataset":
-            ml.train_with_existing_dataset(args.dataset)
+            dataset = loader_exporter.import_dataset(args.dataset)
+            ml.train_with_existing_dataset(dataset)

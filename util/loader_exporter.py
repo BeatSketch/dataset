@@ -27,6 +27,7 @@ def import_dataset(path: str) -> DATASET_TYPE:
     Returns:
         The dataset
     """
+    print("==> Loading dataset")
     with open(path, "r") as f:
         data = json.loads(f.read())
 

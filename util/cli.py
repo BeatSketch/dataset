@@ -59,7 +59,7 @@ def parse_args():
         required=False,
         help="Only use a subset of the data",
     )
-    train_dataset = sp.add_parser(
+    train_dataset = training.add_parser(
         "dataset", help="Load training data from a dataset file"
     )
     train_dataset.add_argument("dataset", help="The dataset file")
