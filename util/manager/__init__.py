@@ -48,3 +48,9 @@ def process_file(
         ml.train(
             data, dataset_save_location=processed_save_location, test_onnx=test_onnx
         )
+    else:
+        if processed_save_location == "":
+            print("ERROR: No save location for dataset specified")
+
+        if data:
+            ml.preprocess_only(data, processed_save_location)
