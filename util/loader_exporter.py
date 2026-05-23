@@ -1,4 +1,5 @@
 import json
+import time
 from ml.preprocess import DATASET_TYPE
 import numpy as np
 
@@ -28,7 +29,10 @@ def import_dataset(path: str) -> DATASET_TYPE:
         The dataset
     """
     print("==> Loading dataset")
+    start = time.time()
     with open(path, "r") as f:
         data = json.loads(f.read())
 
-    return (np.array(data[0]), np.array(data[1]), np.array(data[2]), np.array(data[3]))
+    data = (np.array(data[0]), np.array(data[1]), np.array(data[2]), np.array(data[3]))
+    print(" -> Loading completed in", time.time() - start, "seconds")
+    return data

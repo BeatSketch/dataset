@@ -47,4 +47,7 @@ if __name__ == "__main__":
             )
         elif args.train == "dataset":
             dataset = loader_exporter.import_dataset(args.dataset)
+            print("\n==> Starting training")
             ml.train_with_existing_dataset(dataset)
+    elif args.cmd == "help":
+        ap.print_help()
