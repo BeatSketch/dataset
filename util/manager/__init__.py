@@ -13,6 +13,7 @@ def process_folder(
     train: bool,
     processed_save_location: str = "",
     max_files: int = -1,
+    test_onnx: bool = False,
 ):
     """Process all bsor files in a folder
 
@@ -25,7 +26,9 @@ def process_folder(
     data = fp(dir, max_files=max_files)
 
     if train:
-        ml.train(data, dataset_save_location=processed_save_location)
+        ml.train(
+            data, dataset_save_location=processed_save_location, test_onnx=test_onnx
+        )
     else:
         if processed_save_location == "":
             print("ERROR: No save location for dataset specified")
@@ -37,8 +40,11 @@ def process_file(
     filename: str,
     train: bool,
     processed_save_location: str = "",
+    test_onnx: bool = False,
 ):
     data = file.process_file(filename, BPMCache(), True)
 
     if train and data:
-        ml.train(data, dataset_save_location=processed_save_location)
+        ml.train(
+            data, dataset_save_location=processed_save_location, test_onnx=test_onnx
+        )
