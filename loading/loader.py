@@ -50,11 +50,16 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
             quat_r = quaternion.quaternion(
                 hand_r.w_rot, hand_r.x_rot, hand_r.y_rot, hand_r.z_rot
             )
-            # The coordinate system of the left hand is left-oriented, so
-            # flip the x coordinate
+
             dir_l = quaternion.rotate_vectors(quat_l, base_vec)
-            dir_l[0] *= -1
             dir_r = quaternion.rotate_vectors(quat_r, base_vec)
+
+            # Change the orientation of the coordinate system
+            dir_l[0] *= -1
+            dir_l[2] *= -1
+
+            dir_r[2] *= -1
+
             tip_l = dir_l + np.array(hand_l.position)
             tip_r = dir_r + np.array(hand_l.position)
 
