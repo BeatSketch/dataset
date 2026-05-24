@@ -44,7 +44,7 @@ def generate_training_data(
     buckets: dict[int, tuple[list[int], list[int]]] = {}
     for idx, frame in enumerate(tracking):
         for i, hand in enumerate(HANDS):
-            time = int((frame["time"] + frame[hand][2] / njs) / sec_per_unit)
+            time = int((frame["time"] - frame[hand][2] / njs) / sec_per_unit)
             try:
                 buckets[time][i].append(idx)
             except Exception:

@@ -4,11 +4,8 @@ import numpy as np
 from util.dtype import BeatSketchBlock, BeatSketchTrackingData
 from util.bpm_cache import BPMCache
 
-# TODO: Figure out what the base vector is (unit vector in which direction?)
-# This is almost certainly correct
 base_vec = np.array([1, 0, 0])
 angle_comp_vec = base_vec
-# TODO: Verify I got this right
 translation = [0, 4, 2, 6, 1, 7, 3, 5]
 
 
@@ -22,9 +19,6 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
         file: Path to the BSOR file to process
     """
     with open(file, "rb") as f:
-        # TODO: Check if rotation is correct (or if controller offsets need to be computed)
-        # bsor.controller_offsets.left - This is how to get the offsets if needed
-        # I am almost certain this is correct
         bsor = make_bsor(f)
 
         bpm = cache.get_bpm_for_song(bsor.info.songHash)[0]
@@ -53,15 +47,20 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
 
             dir_l = quaternion.rotate_vectors(quat_l, base_vec)
             dir_r = quaternion.rotate_vectors(quat_r, base_vec)
+            pos_l = np.array(hand_l.position)
+            pos_r = np.array(hand_r.position)
 
             # Change the orientation of the coordinate system
             dir_l[0] *= -1
             dir_l[2] *= -1
+            pos_l[2] *= -1
 
             dir_r[2] *= -1
+            pos_r[0] *= -1
+            pos_r[2] *= -1
 
-            tip_l = dir_l + np.array(hand_l.position)
-            tip_r = dir_r + np.array(hand_l.position)
+            tip_l = dir_l + pos_l
+            tip_r = dir_r + pos_r
 
             tracking_data.append(
                 {
