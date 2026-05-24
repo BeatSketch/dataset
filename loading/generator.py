@@ -68,6 +68,7 @@ def generate_training_data(
             els: list[np.ndarray] = []
 
             if len(indices) < TRACKING_PER_UNIT:
+                # TODO: Consider skipping these
                 too_few_elements_incidents.append(TRACKING_PER_UNIT - len(indices))
                 for _ in range(TRACKING_PER_UNIT - len(indices)):
                     els.append(np.array([0, 0, 0, 0, 0, 0]))
