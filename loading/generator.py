@@ -147,12 +147,12 @@ def hit_locations(
                     )
                 ):
                     try:
-                        locations.index((line, col))
+                        locations.index((col, line))
                     except Exception:
                         try:
-                            already_hit.index((line, col))
+                            already_hit.index((col, line))
                         except Exception:
-                            locations.append((line, col))
+                            locations.append((col, line))
 
     return locations
 

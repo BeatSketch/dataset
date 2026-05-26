@@ -34,6 +34,7 @@ def generate_real_dataset(
         labels.append(val["has_block"])
         training_data_frame: list[float] = [val["x"], val["y"], val["beat"]]
         for loc in val["tracking"]:
+            # loc each are 6 floats, first three are tip position, second three are direction vector
             training_data_frame += loc.tolist()
 
         vals.append(np.array(training_data_frame))
