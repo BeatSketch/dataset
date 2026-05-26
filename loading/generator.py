@@ -1,4 +1,5 @@
-from typing import Literal
+from loading.hits_blocks import hit_locations, process_blocks
+from loading.values import BEAT_SPLIT, HANDS, TRACKING_PER_UNIT
 from util.dtype import (
     BeatSketchBlock,
     BeatSketchTrackingData,
@@ -7,28 +8,6 @@ from util.dtype import (
 )
 import math
 import numpy as np
-
-# TODO: Find out what the grid size actually is
-GRID_FIELD_WIDTH = 0.666
-GRID_FIELD_HEIGHT = 0.666
-GRID_Y_MIN_VAL = 0
-GRID_X_MIN_VAL = -1.333
-# In percent of the saber length, how much of it is considered the tip
-THRESHOLD = 0.3
-
-# Into how many parts to split each beat (should be power of 2 and no more than 8)
-# I do also think we should make this configurable for the user? (or provide 2 settings?)
-# Or at least for the training data, make it depend on the BPM
-BEAT_SPLIT = 4
-# Number of tracking data points per time unit
-TRACKING_PER_UNIT = 4
-
-# How many of the datapoints before to include
-DATA_SLACK_BEFORE = 4
-# How many of the datapoints after to include
-DATA_SLACK_AFTER = 4
-HANDS: list[Literal["left"] | Literal["right"]] = ["left", "right"]
-
 
 def generate_training_data(
     tracking: list[BeatSketchTrackingData],
@@ -77,6 +56,7 @@ def generate_training_data(
                 els.append(tracking[indices[math.floor(one_every_n_els * k)]][hand])
 
             # Combine with pre-processed blocks
+            # FIXME: This appears to be VERY broken
             already_processed_locations: list[tuple[int, int]] = []
             for j in range(block_idx[i], len(hit_blocks)):
                 u = int(hit_blocks[j]["beat"] * BEAT_SPLIT)
@@ -109,70 +89,3 @@ def generate_training_data(
         print("There were", len(too_few_elements_incidents), "instances where there were too few blocks per bucket")
 
     return {"data": training_data, "njs": njs, "bpm": bpm}
-
-
-def hit_locations(
-    tracking: list[np.ndarray],
-    already_hit: list[tuple[int, int]],
-) -> list[tuple[int, int]]:
-    locations: list[tuple[int, int]] = []
-    """Determine possible locations where a block could be placed
-
-    Args:
-        tracking: The tracking data to process
-        already_hit: A list of all already processed locations
-
-    Returns:
-        A list of coordinates on the grid that were touched by the tip
-    """
-    for pos in tracking:
-        hand = pos[:3]
-        dir = pos[3:]
-        for line in range(3):
-            for col in range(4):
-                if (
-                    hand[0] < GRID_X_MIN_VAL + (col + 1) * GRID_FIELD_WIDTH
-                    and hand[0] > GRID_X_MIN_VAL + col * GRID_FIELD_WIDTH
-                    and (
-                        (
-                            hand[1] < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
-                            and hand[1] > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
-                        )
-                        or (
-                            hand[1] - THRESHOLD * dir[1]
-                            < GRID_Y_MIN_VAL + (line + 1) * GRID_FIELD_HEIGHT
-                            and hand[1] - THRESHOLD * dir[1]
-                            > GRID_Y_MIN_VAL + line * GRID_FIELD_HEIGHT
-                        )
-                    )
-                ):
-                    try:
-                        locations.index((col, line))
-                    except Exception:
-                        try:
-                            already_hit.index((col, line))
-                        except Exception:
-                            locations.append((col, line))
-
-    return locations
-
-
-def process_blocks(
-    blocks: list[BeatSketchBlock], bpm: int
-) -> list[BeatSketchTrainingData]:
-    data: list[BeatSketchTrainingData] = []
-
-    for block in blocks:
-        if block["good_cut"]:
-            data.append(
-                {
-                    "has_block": True,
-                    "beat": block["time"] / bpm,
-                    "is_right_hand": block["is_right_hand"],
-                    "x": block["x"],
-                    "y": block["y"],
-                    "tracking": [],
-                }
-            )
-
-    return data
