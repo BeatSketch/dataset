@@ -56,7 +56,6 @@ def generate_training_data(
                 els.append(tracking[indices[math.floor(one_every_n_els * k)]][hand])
 
             # Combine with pre-processed blocks
-            # FIXME: This appears to be VERY broken
             already_processed_locations: list[tuple[int, int]] = []
             for j in range(block_idx[i], len(hit_blocks)):
                 u = int(hit_blocks[j]["beat"] * BEAT_SPLIT)
