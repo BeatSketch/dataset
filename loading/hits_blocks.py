@@ -58,7 +58,7 @@ def hit_locations(
 
 
 def process_blocks(
-    blocks: list[BeatSketchBlock], bpm: int
+    blocks: list[BeatSketchBlock], bpm: float
 ) -> list[BeatSketchTrainingData]:
     data: list[BeatSketchTrainingData] = []
     bps = bpm / 60

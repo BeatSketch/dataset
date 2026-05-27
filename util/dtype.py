@@ -5,7 +5,7 @@ import numpy as np
 class BeatSketchTrainingDataSet(TypedDict):
     data: list[BeatSketchTrainingData]
     njs: float
-    bpm: int
+    bpm: float
 
 
 class BeatSketchTrainingData(TypedDict):

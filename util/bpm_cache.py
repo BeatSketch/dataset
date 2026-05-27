@@ -5,7 +5,7 @@ import json
 
 
 class BPMCache:
-    _bpm_cache: dict[str, int]
+    _bpm_cache: dict[str, float]
 
     def __init__(self, print_cache_load_success: bool = False):
         try:
@@ -47,7 +47,7 @@ class BPMCache:
                     file_list.append(file)
         return file_list
 
-    def get_bpm_for_song(self, song_hash: str) -> tuple[int, bool]:
+    def get_bpm_for_song(self, song_hash: str) -> tuple[float, bool]:
         downloaded = False
         try:
             self._bpm_cache[song_hash]

@@ -12,7 +12,7 @@ import numpy as np
 def generate_training_data(
     tracking: list[BeatSketchTrackingData],
     blocks: list[BeatSketchBlock],
-    bpm: int,
+    bpm: float,
     njs: float,
     print_debugging: bool = True
 ) -> BeatSketchTrainingDataSet:
