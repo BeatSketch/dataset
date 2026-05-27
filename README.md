@@ -6,7 +6,13 @@ It also contains all the scripts necessary to train the models.
 If you can't code and still want to help out, [uploading BSOR files](https://polybox.ethz.ch/index.php/s/RbRFRgc7WnmotAg) is an easy way.
 
 
-# Usage
+# Contributing
+## Checkout
+Please note that all model files are stored using `git-lfs`, see the corresponding man page (`man git-lfs`) for it.
+In short, install `git-lfs`, then run `git lfs install`, then any `git pull`, `git push` and `git commit` command will automatically also handle the LFS files.
+Alternatively, run `git lfs pull` to pull down the models.
+
+## Usage
 There are three primary commands to know:
 - Create dataset file: 
     ```bash
