@@ -16,6 +16,18 @@ def generate_training_data(
     njs: float,
     print_debugging: bool = True
 ) -> BeatSketchTrainingDataSet:
+    """Generates training set in `BeatSketchTrainingDataSet` format
+
+    Args:
+        tracking: tracking data of corresponding replay
+        blocks: block data of corresponding replay
+        bpm: bpm of corresponding replay
+        njs: note jump speed of corresponding replay
+        print_debugging: enable verbose output
+
+    Returns:
+        Dataset: Dataset ready for Model training
+    """
     training_data: list[BeatSketchTrainingData] = []
     sec_per_unit = 60 / (bpm * BEAT_SPLIT)
 

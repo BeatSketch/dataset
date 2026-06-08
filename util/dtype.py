@@ -3,12 +3,14 @@ import numpy as np
 
 
 class BeatSketchTrainingDataSet(TypedDict):
+    """Wrapper type for the dataset, includes metadata """
     data: list[BeatSketchTrainingData]
     njs: float
     bpm: float
 
 
 class BeatSketchTrainingData(TypedDict):
+    """ Beat-Quantized Training data for a single beat """
     # Tracking points
     tracking: list[np.ndarray]
     # The current beat (z-locations)
@@ -23,7 +25,11 @@ class BeatSketchTrainingData(TypedDict):
 
 
 class BeatSketchTrackingData(TypedDict):
-    # A 2d array of all tracking data of the hands
+    """ Tracking data for a specific point in time 
+    
+    Attributes `left`, `right` are 2D arrays each containing saber tip position & direction vector.
+    """
+    # A 2d array of all tracking data of the hands: 
     left: np.ndarray
     right: np.ndarray
     # The time of the event
@@ -31,6 +37,7 @@ class BeatSketchTrackingData(TypedDict):
 
 
 class BeatSketchBlock(TypedDict):
+    """ BeatSketch's format for a block received from BSOR replay """
     # Cut direction in BeatSaber numbering format
     orientation: int
     # The lane of the cut

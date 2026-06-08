@@ -6,9 +6,8 @@ import numpy as np
 # Specify the model path
 def run_model(model_path: str, X: np.ndarray, y: np.ndarray):
     print("==> Testing model", model_path)
-    # Ensuring that
-    X.astype(np.float32)
-    y.astype(np.float32)
+    X = X.astype(np.float32)
+    y = y.astype(np.float32)
     with open(model_path, "rb") as f:
         model_data = f.read()
         session = rt.InferenceSession(

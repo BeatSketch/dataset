@@ -60,6 +60,18 @@ def hit_locations(
 def process_blocks(
     blocks: list[BeatSketchBlock], bpm: float
 ) -> list[BeatSketchTrainingData]:
+    """Utility method to snap blocks onto beat grid, also drops all bad cuts.\\
+    Example: if `BEAT_SPLIT=4`, blocks are assigned to one of 4 subdivisions per beat. (quarter note quantization)
+
+    Args:
+        blocks (list[BeatSketchBlock]): Parsed block data from BSOR Replay
+        bpm (float): BPM of corresponding replay
+
+    Returns:
+        list[BeatSketchTrainingData]: Quantized list of blocks
+    """
+    
+    
     data: list[BeatSketchTrainingData] = []
     bps = bpm / 60
 

@@ -5,6 +5,9 @@ from ml.preprocess import DATASET_TYPE
 
 
 def train_model(dataset: DATASET_TYPE) -> str:
+    """
+        Train basic model using untuned `sklearn.neural_network.MLPClassifier`. Exports as `mlp.onnx`.
+    """
     print("  -> Training sklearn.neural_network.MLPClassifier")
 
     X, X_test, y, y_test = dataset

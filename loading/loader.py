@@ -33,8 +33,9 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
             if print_debugging:
                 print("This map uses non-standard mode")
             return False
+        
+        # Parse tracking data from BSOR frames into BeatSketch format
         tracking_data: list[BeatSketchTrackingData] = []
-
         for frame in bsor.frames:
             hand_l = frame.left_hand
             hand_r = frame.left_hand
@@ -70,6 +71,7 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
                 }
             )
 
+        # Parse BSOR notes (blocks) into BeatSketch block format
         block_data: list[BeatSketchBlock] = []
         # bsor.notes.reverse()
         for block in bsor.notes:
@@ -104,6 +106,10 @@ def load_replay_data(file: str, cache: BPMCache, print_debugging: bool = False):
 
 
 def orientation_from_angle(angle: float) -> int:
+    """ Converts angle to Block orientation in Beat Saber format.
+    
+    See https://bsmg.wiki/mapping/map-format/beatmap.html#color-notes-cut-direction
+    """
     loc = int(((angle + 22.5) % 360) // 45)
 
     return translation[loc]
