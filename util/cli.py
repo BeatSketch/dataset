@@ -49,6 +49,7 @@ def parse_args():
     train_file.add_argument("file", help="The path to the file to process")
     train_file.add_argument("save_path", help="The path to save the dataset to to")
     train_file.add_argument("--onnx", help="Test the exported ONNX model as well", action="store_true")
+    train_file.add_argument("-m", "--model", required=False, help="Choose a model. defaults to sklearn/mlp.py", default="mlp")
 
     train_folder = training.add_parser("folder", help="Train on a full folder")
     train_folder.add_argument("folder", help="The folder to process")
@@ -61,11 +62,13 @@ def parse_args():
         help="Only use a subset of the data",
     )
     train_folder.add_argument("--onnx", help="Test the exported ONNX model as well", action="store_true")
+    train_folder.add_argument("-m", "--model", required=False, help="Choose a model. defaults to sklearn/mlp.py", default="mlp")
 
     train_dataset = training.add_parser(
         "dataset", help="Load training data from a dataset file"
     )
     train_dataset.add_argument("dataset", help="The dataset file")
     train_dataset.add_argument("--onnx", help="Test the exported ONNX model as well", action="store_true")
+    train_dataset.add_argument("-m", "--model", required=False, help="Choose a model. defaults to sklearn/mlp.py", default="mlp")
 
     return ap.parse_args(), ap

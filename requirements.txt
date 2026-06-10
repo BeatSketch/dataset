@@ -5,3 +5,5 @@ colorama
 onnxruntime
 scikit-learn
 skl2onnx
+tqdm
+onnxscript

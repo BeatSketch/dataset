@@ -1,8 +1,14 @@
 # Model training infrastructure
-This folder contains everything needed to train the classifiers used in BeatSketch.
-We will likely train models using both sklearn and pytorch, see the separate subfolders.
+This folder contains everything needed to train the classifiers used in BeatSketch. We are currently using `sklearn` and `PyTorch`. The goal is that every model is exportable as `.onnx`.
 
-Currently though, only sklearn.
+## Models
 
-We aim to export every possible model as ONNX to simplify runtime and keep the application size down
-for the end-user software
+### sklearn/mlp.py
+
+Simple model using `sklearn.neural_network.MLPClassifier` without tuning. This is the default fallback in the CLI.
+
+### torch/torch_mlp.py
+
+Simple MLP model in torch using `torch.nn`.
+
+**Note**: This model outputs a tensor. Use `torch.argmax(output, dim=1)` to get the class.

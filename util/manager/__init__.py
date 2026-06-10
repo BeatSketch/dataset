@@ -14,20 +14,22 @@ def process_folder(
     processed_save_location: str = "",
     max_files: int = -1,
     test_onnx: bool = False,
+    model="mlp"
 ):
-    """Process all bsor files in a folder
+    """Process all BSOR files in a folder
 
     Args:
         max_files: The maximum number of files to process
         dir: The directory to process
         train: Whether or not to train the model
         processed_save_location: If not empty string, path to file to store dataset in
+        model: the model to train
     """
     data = fp(dir, max_files=max_files)
 
     if train:
         ml.train(
-            data, dataset_save_location=processed_save_location, test_onnx=test_onnx
+            data, dataset_save_location=processed_save_location, test_onnx=test_onnx, model=model
         )
     else:
         if processed_save_location == "":
@@ -41,12 +43,22 @@ def process_file(
     train: bool,
     processed_save_location: str = "",
     test_onnx: bool = False,
+    model = "mlp"
 ):
+    """Process a single BSOR file
+
+    Args:
+        filename: the file to be processed
+        train: Whether or not to train the model
+        processed_save_location: If not empty string, path to file to store dataset in
+        test_onnx: Whether to test using the ONNX runner
+        model: the model to train
+    """
     data = file.process_file(filename, BPMCache(), True)
 
     if train and data:
         ml.train(
-            data, dataset_save_location=processed_save_location, test_onnx=test_onnx
+            data, dataset_save_location=processed_save_location, test_onnx=test_onnx, model=model
         )
     else:
         if processed_save_location == "":

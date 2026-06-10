@@ -43,6 +43,7 @@ if __name__ == "__main__":
                 True,
                 processed_save_location=args.save_path,
                 test_onnx=args.onnx,
+                model=args.model
             )
         elif args.train == "folder":
             process_folder(
@@ -51,10 +52,11 @@ if __name__ == "__main__":
                 processed_save_location=args.save_path,
                 max_files=mp.cpu_count() if args.test else -1,
                 test_onnx=args.onnx,
+                model=args.model
             )
         elif args.train == "dataset":
             dataset = loader_exporter.import_dataset(args.dataset)
             print("\n==> Starting training")
-            ml.train_with_existing_dataset(dataset, test_onnx=args.onnx)
+            ml.train_with_existing_dataset(dataset, test_onnx=args.onnx, model=args.model)
     elif args.cmd == "help":
         ap.print_help()
