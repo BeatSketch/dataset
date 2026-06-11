@@ -59,5 +59,9 @@ The CLI features three primary commands:
     ```bash
     ./beatsketch_dataset.py train dataset path/to/dataset.json -m mlp
     ```
+- Evaluate models using pre-saved dataset file and trained model:
+    ```bash
+    ./beatsketch_dataset.py eval ./models/model.onnx path/to/dataset.json
+    ```
 
 For other commands, see `./beatsketch_dataset.py help`
