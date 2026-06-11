@@ -1,3 +1,5 @@
+from time import time
+
 from ml import preprocess
 from util import loader_exporter
 from util.dtype import BeatSketchTrainingDataSet
@@ -44,6 +46,7 @@ def train_with_existing_dataset(
         test_onnx: Whether to test using the ONNX runner or not
         model: the model to train
     """
+    start = time()
     if model == "mlp_torch":
         import ml.torch.torch_mlp as torch_mlp
 
@@ -53,8 +56,13 @@ def train_with_existing_dataset(
 
         mlp_path = mlp.train_model(dataset)
 
+    trained = time()
+    print("\n==> Trained model in", trained - start, "seconds\n")
+
     # Verify models
     if test_onnx:
         import ml.onnx_runner as onnx_runner
 
+        print("==> Testing model with ONNX runtime")
         onnx_runner.run_model(mlp_path, dataset[1], dataset[3])
+        print("\n==> Model evaluation completed in", time() - trained, "seconds\n")
