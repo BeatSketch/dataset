@@ -140,8 +140,20 @@ def train_model(dataset: DATASET_TYPE) -> str:
     print("  --> Exporting model")
     if torch.cuda.is_available():
         model = model.to("cpu")
+        
+    dummy_input = torch.tensor(X, dtype=torch.float32)
     FILE = "models/mlp_torch.onnx"
-    torch.onnx.export(model, (torch.tensor(X, dtype=torch.float32),), FILE, dynamo=True)
+    batch_dim = torch.export.Dim("batch_size", min=1)
+    dynamic_shapes = {"x": {0: batch_dim}}
+    # "x" matches the forward functions input
+    
+    torch.onnx.export(
+        model, 
+        (dummy_input,), 
+        FILE, 
+        dynamo=True,
+        dynamic_shapes=dynamic_shapes
+    )
     print("  --> Training complete\n")
 
     return FILE
