@@ -10,9 +10,10 @@ def run_model(model_path: str, X: np.ndarray, y: np.ndarray):
     y = y.astype(np.float32)
     session = rt.InferenceSession(model_path, providers=rt.get_available_providers())
     input_name = session.get_inputs()[0].name
-    print(session.get_inputs()[0].shape)
 
     pred = cast(np.ndarray, session.run(None, {input_name: X})[0])
+    if session.get_outputs()[0].shape[1] == 2:
+        pred = pred.argmax(axis=0)
     score = 0
     for j in range(pred.size):
         if pred[j] == y[j]:
