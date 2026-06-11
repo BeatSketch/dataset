@@ -7,6 +7,7 @@ import multiprocessing as mp
 import util.cli as cli
 
 if __name__ == "__main__":
+    args, ap = cli.parse_args()
     try:
         from util.manager import folder_preprocessing, process_file, process_folder
         import ml
@@ -24,7 +25,6 @@ if __name__ == "__main__":
         if input("Print stack trace? (y/N) ").lower() == "y":
             raise e
         exit(1)
-    args, ap = cli.parse_args()
 
     if args.cmd == "preprocess":
         if args.preprocess == "file":
