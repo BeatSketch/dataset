@@ -67,7 +67,7 @@ def train_model(dataset: DATASET_TYPE) -> str:
     d_hidden = 32
     model = MLPclassifier(d_input, d_hidden)
     
-    device = torch.device("cude:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
     criterion = nn.CrossEntropyLoss()
