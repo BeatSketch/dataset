@@ -31,9 +31,16 @@ pip install -r requirements.txt
 ```
 
 For PyTorch, choose & install the version appropriate for your hardware [here](https://pytorch.org/get-started/locally/). 
-For AMD users, we recommend using the `rocm/pytorch` docker container on Linux. Run it using
+
+**For AMD users:** we recommend using the `rocm/pytorch` docker container on Linux, using:
 ```bash
 docker run -it --network=host --device=/dev/kfd --device=/dev/dri --ipc=host --shm-size 16G --group-add video --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -v /path/to/dataset/repo:/mnt --name beatsketch-training rocm/pytorch:latest
+```
+
+**For Nvidia users:** Check your hardware CUDA version by running `nvidia-smi` and run:
+
+```sh
+pip install torch --index-url https://download.pytorch.org/whl/cuXXX
 ```
 
 ## Usage

@@ -9,6 +9,6 @@ Simple model using `sklearn.neural_network.MLPClassifier` without tuning. This i
 
 ### torch/torch_mlp.py
 
-Simple MLP model in torch using `torch.nn`.
+Simple MLP model in torch using `torch.nn`. Uses weighted assymetric loss to counteract Block/Non-Block inbalance in dataset.
 
 **Note**: This model outputs a tensor. Use `torch.argmax(output, dim=1)` to get the class.

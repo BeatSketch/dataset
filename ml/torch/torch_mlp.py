@@ -50,6 +50,25 @@ class MLPclassifier(nn.Module):
         return self.network(x)
 
 
+def weights(y: np.ndarray, verbose: float = True) -> torch.Tensor:
+    """
+    Returns inverse class frequencies. (To be used as weights for loss function)
+    """
+    blocks, total, classes = np.sum(y), len(y), 2
+    w = np.array([
+        total-blocks,
+        blocks
+    ])
+    w = total / (classes*w)
+    
+    if verbose:
+        print("Datapoint distribution\n", "-"*24)
+        print("\tWeight\tCount")
+        print(f"Block\t{w[0]:.4f}\t{blocks}")
+        print(f"Non-Bl\t{w[1]:.4f}\t{total-blocks}", "\n")
+    
+    return torch.tensor(w, dtype=torch.float32)
+
 def train_model(dataset: DATASET_TYPE) -> str:
     """
     Train basic model using Torch MLP classifier. Exports as `mlp_torch.onnx`.
@@ -65,7 +84,9 @@ def train_model(dataset: DATASET_TYPE) -> str:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"    -> Using device: {device}\n")
 
-    criterion = nn.CrossEntropyLoss()
+    w = weights(y).to(device)
+
+    criterion = nn.CrossEntropyLoss(weight=w)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
     batch_size = 32
