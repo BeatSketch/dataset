@@ -62,5 +62,8 @@ if __name__ == "__main__":
             ml.train_with_existing_dataset(
                 dataset, test_onnx=args.onnx, model=args.model
             )
+    elif args.cmd == "eval":
+        print("\n  MODEL EVALUATION\n")
+        ml.test_model(loader_exporter.import_dataset(args.dataset), args.model_path)
     elif args.cmd == "help":
         ap.print_help()

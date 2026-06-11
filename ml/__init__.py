@@ -50,19 +50,22 @@ def train_with_existing_dataset(
     if model == "mlp_torch":
         import ml.torch.torch_mlp as torch_mlp
 
-        mlp_path = torch_mlp.train_model(dataset)
+        model_path = torch_mlp.train_model(dataset)
     else:
         import ml.sklearn.mlp as mlp
 
-        mlp_path = mlp.train_model(dataset)
+        model_path = mlp.train_model(dataset)
 
-    trained = time()
-    print("\n==> Trained model in", trained - start, "seconds\n")
+    print("\n==> Trained model in", time() - start, "seconds\n")
 
     # Verify models
     if test_onnx:
-        import ml.onnx_runner as onnx_runner
+        test_model(dataset, model_path)
 
-        print("==> Testing model with ONNX runtime")
-        onnx_runner.run_model(mlp_path, dataset[1], dataset[3])
-        print("\n==> Model evaluation completed in", time() - trained, "seconds\n")
+
+def test_model(dataset: preprocess.DATASET_TYPE, model_path: str):
+    import ml.onnx_runner as onnx_runner
+
+    start = time()
+    onnx_runner.run_model(model_path, dataset[1], dataset[3])
+    print("\n==> Model evaluation completed in", time() - start, "seconds\n")
