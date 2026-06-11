@@ -1,8 +1,6 @@
 from ml import preprocess
 from util import loader_exporter
 from util.dtype import BeatSketchTrainingDataSet
-import ml.sklearn.mlp as mlp
-import ml.torch.torch_mlp as torch_mlp
 
 
 def preprocess_only(data: list[BeatSketchTrainingDataSet], dataset_save_location: str):
@@ -17,7 +15,7 @@ def train(
     data: list[BeatSketchTrainingDataSet],
     dataset_save_location: str = "",
     test_onnx: bool = False,
-    model: str = "mlp"
+    model: str = "mlp",
 ):
     """Train a model from a list of TrainingDataSets
 
@@ -47,8 +45,12 @@ def train_with_existing_dataset(
         model: the model to train
     """
     if model == "mlp_torch":
+        import ml.torch.torch_mlp as torch_mlp
+
         mlp_path = torch_mlp.train_model(dataset)
     else:
+        import ml.sklearn.mlp as mlp
+
         mlp_path = mlp.train_model(dataset)
 
     # Verify models
