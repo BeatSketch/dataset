@@ -28,12 +28,19 @@ def folder_preprocessing(dir: str) -> list[str]:
     return files
 
 
-def _process_file_list(files: list[str]) -> list[BeatSketchTrainingDataSet]:
+def _process_file_list(args: tuple[float, list[str]]) -> list[BeatSketchTrainingDataSet]:
     processed: list[BeatSketchTrainingDataSet] = []
     cache = BPMCache()
+    files = args[1]
+    no_block_ratio = args[0]
     for idx, file in enumerate(files):
         try:
-            data = process_file(file, cache, print_debugging=print_debugging)
+            data = process_file(
+                file,
+                cache,
+                print_debugging=print_debugging,
+                no_block_ratio=no_block_ratio,
+            )
             if not not data:
                 processed += data
                 if print_status:
@@ -56,7 +63,11 @@ def _process_file_list(files: list[str]) -> list[BeatSketchTrainingDataSet]:
     return processed
 
 
-def process_folder(dir: str, max_files=-1):
+def process_folder(
+    dir: str,
+    max_files: int = -1,
+    no_block_ratio: float = 0.5,
+):
     """Process a whole folder recursively at once,
         fully parallelized
 
@@ -75,7 +86,7 @@ def process_folder(dir: str, max_files=-1):
         )
 
     # Split work and process
-    split_work = divide_work(files, mp.cpu_count())
+    split_work = divide_work(files, mp.cpu_count(), no_block_ratio)
     print("\n--> Using", len(split_work), "threads to process data\n")
     pool = mp.Pool()
     data: list[list[BeatSketchTrainingDataSet]] = pool.map(
@@ -101,7 +112,7 @@ def process_folder(dir: str, max_files=-1):
         "s per file singlethreaded)\n",
         "with",
         len(files) - len(flattened),
-        "failing to process\n"
+        "failing to process\n",
     )
 
     return flattened

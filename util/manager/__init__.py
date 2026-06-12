@@ -14,7 +14,8 @@ def process_folder(
     processed_save_location: str = "",
     max_files: int = -1,
     test_onnx: bool = False,
-    model="mlp"
+    model: str = "mlp",
+    no_block_ratio: float = 0.5,
 ):
     """Process all BSOR files in a folder
 
@@ -25,11 +26,14 @@ def process_folder(
         processed_save_location: If not empty string, path to file to store dataset in
         model: the model to train
     """
-    data = fp(dir, max_files=max_files)
+    data = fp(dir, max_files=max_files, no_block_ratio=float(no_block_ratio))
 
     if train:
         ml.train(
-            data, dataset_save_location=processed_save_location, test_onnx=test_onnx, model=model
+            data,
+            dataset_save_location=processed_save_location,
+            test_onnx=test_onnx,
+            model=model,
         )
     else:
         if processed_save_location == "":
@@ -43,7 +47,8 @@ def process_file(
     train: bool,
     processed_save_location: str = "",
     test_onnx: bool = False,
-    model = "mlp"
+    model: str = "mlp",
+    no_block_ratio: float = 0.5,
 ):
     """Process a single BSOR file
 
@@ -54,11 +59,14 @@ def process_file(
         test_onnx: Whether to test using the ONNX runner
         model: the model to train
     """
-    data = file.process_file(filename, BPMCache(), True)
+    data = file.process_file(filename, BPMCache(), True, float(no_block_ratio))
 
     if train and data:
         ml.train(
-            data, dataset_save_location=processed_save_location, test_onnx=test_onnx, model=model
+            data,
+            dataset_save_location=processed_save_location,
+            test_onnx=test_onnx,
+            model=model,
         )
     else:
         if processed_save_location == "":

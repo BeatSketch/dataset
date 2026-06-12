@@ -28,6 +28,13 @@ def parse_args():
     preproc_file = preprocessors.add_parser("file", help="Preprocess a single file")
     preproc_file.add_argument("file", help="The path to the file to process")
     preproc_file.add_argument("save_path", help="The path to save the dataset to to")
+    preproc_file.add_argument(
+        "-s",
+        "--split",
+        required=False,
+        help="Choose the split between blocks and no blocks. Defined as #blocks / #no-blocks",
+        default=0.5,
+    )
 
     preproc_folder = preprocessors.add_parser("folder", help="Preprocess a full folder")
     preproc_folder.add_argument("folder", help="The folder to process")
@@ -38,6 +45,13 @@ def parse_args():
         action="store_true",
         required=False,
         help="Only use a subset of the data",
+    )
+    preproc_folder.add_argument(
+        "-s",
+        "--split",
+        required=False,
+        help="Choose the split between blocks and no blocks. Defined as #blocks / #no-blocks",
+        default=0.5,
     )
 
     preproc_bpm = preprocessors.add_parser(
@@ -61,6 +75,13 @@ def parse_args():
         help="Choose a model. defaults to sklearn/mlp.py",
         default="mlp",
     )
+    train_file.add_argument(
+        "-s",
+        "--split",
+        required=False,
+        help="Choose the split between blocks and no blocks. Defined as #blocks / #no-blocks",
+        default=0.5,
+    )
 
     train_folder = training.add_parser("folder", help="Train on a full folder")
     train_folder.add_argument("folder", help="The folder to process")
@@ -71,6 +92,13 @@ def parse_args():
         action="store_true",
         required=False,
         help="Only use a subset of the data",
+    )
+    train_folder.add_argument(
+        "-s",
+        "--split",
+        required=False,
+        help="Choose the split between blocks and no blocks. Defined as #blocks / #no-blocks",
+        default=0.5,
     )
     train_folder.add_argument(
         "--onnx", help="Test the exported ONNX model as well", action="store_true"

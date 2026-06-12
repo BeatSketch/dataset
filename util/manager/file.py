@@ -8,7 +8,12 @@ from loading.loader import load_replay_data
 from util.bpm_cache import BPMCache
 
 
-def process_file(file: str, cache: BPMCache,print_debugging: bool = False):
+def process_file(
+    file: str,
+    cache: BPMCache,
+    print_debugging: bool = False,
+    no_block_ratio: float = 0.5,
+):
     start = time.time()
     data = load_replay_data(file, cache, print_debugging)
     mid = time.time()
@@ -18,7 +23,7 @@ def process_file(file: str, cache: BPMCache,print_debugging: bool = False):
     training_data = generate_training_data(
         data[0], data[1], data[2], data[3], print_debugging=print_debugging
     )
-    filtered_data = filter_training_data(0.5, training_data)
+    filtered_data = filter_training_data(no_block_ratio, training_data)
     if print_debugging:
         print(
             len(training_data["data"]),

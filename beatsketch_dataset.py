@@ -28,13 +28,19 @@ if __name__ == "__main__":
 
     if args.cmd == "preprocess":
         if args.preprocess == "file":
-            process_file(args.file, False, processed_save_location=args.save_path)
+            process_file(
+                args.file,
+                False,
+                processed_save_location=args.save_path,
+                no_block_ratio=args.split,
+            )
         elif args.preprocess == "folder":
             process_folder(
                 args.folder,
                 False,
                 processed_save_location=args.save_path,
                 max_files=mp.cpu_count() if args.test else -1,
+                no_block_ratio=args.split,
             )
         elif args.preprocess == "bpm":
             folder_preprocessing(args.folder)
@@ -46,6 +52,7 @@ if __name__ == "__main__":
                 processed_save_location=args.save_path,
                 test_onnx=args.onnx,
                 model=args.model,
+                no_block_ratio=args.split,
             )
         elif args.train == "folder":
             process_folder(
@@ -55,6 +62,7 @@ if __name__ == "__main__":
                 max_files=mp.cpu_count() if args.test else -1,
                 test_onnx=args.onnx,
                 model=args.model,
+                no_block_ratio=args.split,
             )
         elif args.train == "dataset":
             dataset = loader_exporter.import_dataset(args.dataset)
