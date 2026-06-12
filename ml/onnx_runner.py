@@ -12,7 +12,7 @@ def run_model(model_path: str, X: np.ndarray, y: np.ndarray):
     input_name = session.get_inputs()[0].name
 
     pred = cast(np.ndarray, session.run(None, {input_name: X})[0])
-    if session.get_outputs()[0].shape[1] == 2:
+    if len(session.get_outputs()[0].shape) == 2:
         pred = pred.argmax(axis=1)
     score = 0
     for j in range(pred.size):
